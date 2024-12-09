@@ -1,3 +1,8 @@
+/*
+ Built in from template
+ */
+
+
 /* See http://r-pkgs.had.co.nz/man.html#text-formatting for a list of
  formatting tags that can be used in R documentation.*/
 
