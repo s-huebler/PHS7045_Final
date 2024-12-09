@@ -1,4 +1,4 @@
 library(testthat)
-library(RPackageTemplate)
+library(gmhs2)
 
-test_check("RPackageTemplate")
+test_check("gmhs2")
