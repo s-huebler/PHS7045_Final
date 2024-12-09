@@ -9,3 +9,4 @@ src/*.dll
 build/
 man/
 */RcppExports.*
+inst/doc
