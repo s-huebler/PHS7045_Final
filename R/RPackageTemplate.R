@@ -1,22 +1,22 @@
 # An R package template illustrating the use of various packages
-# 
+#
 # Author: muchmore
 ###############################################################################
 
 
 #' A template for Rcpp(Armadillo) packages
-#' 
+#'
 #' An R package template illustrating the use of various packages including:
-#' \code{\link[Rcpp]{Rcpp}}, \code{\link[RcppArmadillo]{RcppArmadillo}}, 
-#' \code{\link[devtools]{devtools}}, \code{\link[roxygen2]{roxygen2}}, 
+#' \code{\link[Rcpp]{Rcpp}}, \code{\link[RcppArmadillo]{RcppArmadillo}},
+#' \code{\link[devtools]{devtools}}, \code{\link[roxygen2]{roxygen2}},
 #' and \code{\link[testthat]{testthat}}.
 #'
-#' @name 
-#' RPackageTemplate
-#' @docType 
+#' @name
+#' gmhs2
+#' @docType
 #' package
-#' @importFrom 
+#' @importFrom
 #' Rcpp evalCpp
-#' @useDynLib 
-#' RPackageTemplate
+#' @useDynLib
+#' gmhs2
 NULL
