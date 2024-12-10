@@ -108,7 +108,7 @@ mh <- function(Y,      #Data
             if(crit < acceptance_ratio_theta){
                 thetas_new[i]<- candidates_thetas[i]
             }
-        }else{print(paste0("non-finite theta"))}
+        }#else{print(paste0("non-finite theta"))}
 
 
 
@@ -137,7 +137,7 @@ mh <- function(Y,      #Data
             if(crit < acceptance_ratio_gamma){
                 gammas_new[i]<- candidates_gammas[i]
             }
-        }else{print(paste0("non-finite gamma"))}
+        }#else{print(paste0("non-finite gamma"))}
 
 
         rm(temp_gamma_candidate,

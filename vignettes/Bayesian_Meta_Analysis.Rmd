@@ -130,7 +130,7 @@ marginalLikelihood(Y = dat_Y,
                    b_gamma = 100) 
 ```
 
-This is a useful function because it performs very quickly despite the need for a high number of simulations in order to attain stable estimates. Below we see an
+This is a useful function because it performs very quickly despite the need for a high number of simulations in order to attain stable estimates. Below we see an optimization function which can be used to find maximum likelihood estimates for the 2 parameters given the hyperparmeters for gamma established above. The optimize function requires reasonable estimates for a starting choice of each parameter.
 
 ```{r}
 optimize_func <- function(Y, mu, tau2){
@@ -153,16 +153,63 @@ optimize_func <- function(Y, mu, tau2){
           )
 }
 
-hats <- optimize_func(Y=as.matrix(data_ex[,2:5]), mu=0.1, tau2=0.1)
+hats <- optimize_func(Y=dat_Y, mu=0.1, tau2=0.1)
 ```
 
-```{r}
-marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 10000, 0, 100)
-marginalLikelihood(as.matrix(data_ex[,2:5]), hats$par[1], hats$par[2], 10000, 0, 100)
-```
+Here we see a comparison of the negative log likelihoods between the starting parameters and the MLE estimated parameters.
 
 ```{r}
-mhGibbs(data_ex, hyperparameters_ex, 0.2, sim = 10, burn = 0)
+marginalLikelihood(dat_Y, 0.2, 0.1, 100000, 0, 100)
+marginalLikelihood(dat_Y, hats$par[1], hats$par[2], 100000, 0, 100)
+```
+
+We can use these parameters to run the gibbs-metropolis-hastings function with the Bayesian = "empirical" argument.
+
+```{r}
+emp_res <- mhGibbs(dat, hyps, mh_scale = 0.2, 
+                                    sim = 1000, burn = 10,
+        Bayesian = "empirical", hat_mu = hats$par[1], hat_tau2 = hats$par[2])
+```
+
+Now we can plot the results of our function.
+
+```{r}
+posterior_labels <- c('V1' = "Balcon",
+                         'V2' = "Clausen",
+                         'V3' = "Multicentre",
+                         'V4' = "Barber",
+                         'V5' = "Norris",
+                         'V6' = "Kahler",
+                         'V7' = "Ledwich"  )
+
+emp_thetas <- emp_res$thetas |> as.data.frame()
+names(emp_thetas)<- c("Balcon",
+                 "Clausen",
+                  "Multicentre",
+                   "Barber",
+                   "Norris",
+                   "Kahler",
+                   "Ledwich"  )
+
+emp_thetas <- stack(emp_thetas)
+names(emp_thetas) <- c("Est", "Trial")
+
+emp_thetas|>
+  ggplot2::ggplot()+
+  ggplot2::geom_histogram(aes(x= Est),
+                 binwidth = 0.01)+
+  facet_wrap(~Trial, scales = "free")
+
+```
+
+# Hierarchical Bayes
+
+The hierarchical model utilizes the posterior estimates for the hyper parameters $\mu$ and $\tau^2$ rather than estimating them empirically. They are updated in every step of the algorithm as well.
+
+```{r}
+hier_res <- mhGibbs(dat, hyps, mh_scale = 0.2, 
+                                    sim = 1000, burn = 10,
+        Bayesian = "hierarchical")
 ```
 
 ```{r}
@@ -174,10 +221,10 @@ posterior_labels <- c('V1' = "Balcon",
                          'V6' = "Kahler",
                          'V7' = "Ledwich"  )
 
-posteriors <- mhGibbs(data_ex, hyperparameters_ex, 0.2, sim = 100000, burn = 1000)$thetas |>
+hier_thetas <- hier_res$thetas |>
     as.data.frame()
 
-names(posteriors)<- c("Balcon",
+names(hier_thetas)<- c("Balcon",
                  "Clausen",
                   "Multicentre",
                    "Barber",
@@ -185,10 +232,10 @@ names(posteriors)<- c("Balcon",
                    "Kahler",
                    "Ledwich"  )
 
-posteriors <- stack(posteriors)
-names(posteriors) <- c("Est", "Trial")
+hier_thetas <- stack(hier_thetas)
+names(hier_thetas) <- c("Est", "Trial")
 
-posteriors|>
+hier_thetas|>
   ggplot2::ggplot()+
   ggplot2::geom_histogram(aes(x= Est),
                  binwidth = 0.01)+
