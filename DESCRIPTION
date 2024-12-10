@@ -19,10 +19,7 @@ Imports:
     Rcpp,
     stats,
     parallel,
-    future,
-    future.apply,
-    ggplot2,
-    shiny
+    ggplot2 
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
 

@@ -204,7 +204,7 @@ emp_thetas|>
 
 # Hierarchical Bayes
 
-The hierarchical model utilizes the posterior estimates for the hyper parameters $\mu$ and $\tau^2$ rather than estimating them empirically. They are updated in every step of the algorithm as well.
+The hierarchical model utilizes the posterior estimates for the hyper parameters $\mu$ and $\tau^2$ rather than estimating them empirically. They are updated in every step of the algorithm as well. Notice here that both the names and order of the columns in the data frame should match the structure used in the example.
 
 ```{r}
 hier_res <- mhGibbs(dat, hyps, mh_scale = 0.2, 

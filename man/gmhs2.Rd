@@ -2,8 +2,8 @@
 % Please edit documentation in R/RPackageTemplate.R
 \docType{package}
 \name{gmhs2}
-\alias{gmhs2-package}
 \alias{gmhs2}
+\alias{gmhs2-package}
 \title{A template for Rcpp(Armadillo) packages}
 \description{
 An R package template illustrating the use of various packages including:
