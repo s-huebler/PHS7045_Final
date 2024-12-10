@@ -18,8 +18,8 @@
 #'
 postMu <- function(x, k, sigma, thetas, b_mu){
 
-    new_mean <- sigma*sum(thetas)/(k*sigma + b_mu)
-    new_sd <- 1/sqrt(k*sigma + b_mu)
+    new_mean <- sigma*sum(thetas)/(k*sigma + 1/b_mu)
+    new_sd <- 1/sqrt(k*sigma + 1/b_mu)
 
     ret <- new_mean + x * new_sd
     ret

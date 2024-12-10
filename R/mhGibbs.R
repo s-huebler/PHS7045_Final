@@ -59,6 +59,7 @@ mhGibbs<- function(Y,               #Data
     mu <- stats::rnorm(sim, 0, 1)
 
     # Random inverse taus from gamma
+    # Issue with transformation (shape changing, cannot predraw)
     tau2 <- 1/stats::rgamma(sim, shape = k/2 + hypers$a_tau2)
 
 
@@ -77,7 +78,7 @@ mhGibbs<- function(Y,               #Data
     tau2_init <- sd(thetas_init)^2
 
     # Matrix of candidate thetas and gammas
-    thetas <- matrix(stats::rnorm(k*sim,0, 1), nrow = sim)
+    thetas <- matrix(stats::rnorm(k*sim,0, tau2_init), nrow = sim)
     gammas <- matrix(stats::rnorm(k*sim,0, 1), nrow = sim)
 
 
@@ -104,13 +105,14 @@ mhGibbs<- function(Y,               #Data
                                   b_mu = hypers$b_mu)
 
             tau2[j] <- gmhs2::postTau(x = tau2[j-1],
+                               k =k,
+                               a_tau = hypers$a_tau,
                                      b_tau = hypers$b_tau,
                                      mu = mu[j],
                                      thetas = thetas[j-1,])
 
 
-            temp <- #gmhs2::mh(Y = Y,
-                mh(Y=Y,
+            temp <- gmhs2::mh(Y = Y,
                              mu = mu[j],
                              tau2 = tau2[j],
                              gammas_mat = gammas[(j-1):j,],

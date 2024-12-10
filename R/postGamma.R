@@ -22,7 +22,7 @@ postGamma <- function(b_gamma, mu, tau2, theta, gamma, rt, rc){
     exp(gamma - theta/2)^rc*
         exp(gamma + theta/2)^rt/
         ((1+exp(gamma - theta/2))^(rc)*(1+exp(gamma + theta/2))^(rt))*
-        1/sqrt(2*pi*tau2)*
+        1/sqrt(2*pi*b_gamma)*
         exp(-1/(2*b_gamma)*(gamma)^2)
 
 

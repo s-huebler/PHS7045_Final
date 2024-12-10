@@ -71,6 +71,7 @@ mh <- function(Y,      #Data
 
     #Define candidates (standard normal*jump + previous iter)
     candidates_thetas <- thetas_mat[2,]*mh_scale*sd(thetas_mat[1,])+thetas_mat[1,]
+    #print(candidates_thetas)
     candidates_gammas <- gammas_mat[2,]*mh_scale*sd(gammas_mat[1,]) +gammas_mat[1,]
 
 
@@ -90,6 +91,8 @@ mh <- function(Y,      #Data
                                               rc = Y[i, "ric"]) |>
             log()
 
+       # print(temp_theta_current)
+
         temp_theta_candidate <- gmhs2::postTheta(tau2 = tau2,
                                                 mu = mu,
                                                 gamma = candidates_gammas[i],
@@ -97,6 +100,8 @@ mh <- function(Y,      #Data
                                                 rt = Y[i, "rit"],
                                                 rc = Y[i, "ric"]) |>
             log()
+
+       # print(temp_theta_candidate)
 
         if(is.finite(temp_theta_candidate) && is.finite(temp_theta_current)){
             acceptance_ratio_theta <- exp(temp_theta_candidate - temp_theta_current)
@@ -106,22 +111,6 @@ mh <- function(Y,      #Data
         }else{print(paste0("non-finite theta"))}
 
 
-        # #print(temp_theta_candidate - temp_theta_current)
-        # if(temp_theta_candidate < -10000000 |
-        #    temp_theta_candidate > 10000000){
-        #     thetas_new[i]<-thetas_new[i]
-        # }else if(crit < (temp_theta_candidate - temp_theta_current)){
-        #     thetas_new[i]<- candidates_thetas[i]
-        # }
-        #
-        # #Need to redo posterior calculation, going to inf
-        # #Temp solution write as function of gammas
-        #
-        # temp_x <- Y[i,"rit"]
-        # temp_y <- Y[i, "nit"]
-        # gammas_new[i]<- log(temp_x/temp_y/(1-temp_x/temp_y))+thetas_new[i]/2
-        # rm(temp_x)
-        # rm(temp_y)
 
         #Gammas
         temp_gamma_current <- gmhs2::postGamma(b_gamma = hypers$b_gamma,
@@ -141,13 +130,7 @@ mh <- function(Y,      #Data
                                            rt = Y[i, "rit"],
                                            rc = Y[i, "ric"]) |>
           log()
-        #
-        # if(temp_gamma_candidate < -10000000 |
-        #    temp_gamma_candidate > 10000000){
-        #   gammas_new[i]<-gammas_new[i]
-        # }else if(crit < (temp_gamma_candidate - temp_gamma_current)){
-        #   gammas_new[i]<- candidates_gammas[i]
-        # }
+
 
         if(is.finite(temp_gamma_candidate) && is.finite(temp_gamma_current)){
             acceptance_ratio_gamma <- exp(temp_gamma_candidate - temp_gamma_current)
