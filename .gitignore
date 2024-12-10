@@ -2,11 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-NAMESPACE
 src/*.o
 src/*.so
 src/*.dll
 build/
-man/
-*/RcppExports.*
 inst/doc
