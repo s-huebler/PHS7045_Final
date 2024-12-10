@@ -19,8 +19,86 @@ library(gmhs2)
 library(ggplot2)
 ```
 
+# Use Case
+
+The gmhs2 package is a package that can be used for bayesian meta analysis when the treatment effect of interest is an odds ratio. This package performs the gibbs-metropolis-hastings hybrid algorithm. The following 2 sections will outline the use case for the package, first theoretically and then with an example of suitable data that can be applied. The meta-analysis can be performed empirically or hierarchically, and both cases will be shown.
+
+## Theoretical
+
+The following notation will be used:
+
+$i$ indexes trial
+
+$K$ number of trials
+
+$r_i^C$ number of outcome events in the control group of trial $i$
+
+$r_i^T$ number of outcome events in the treatment group of trial $i$
+
+$n_i^C$ number of individuals in the control group of trial $i$
+
+$n_i^T$ number of individuals in the treatment group of trial $i$
+
+$\pi_i^C$ probability of the outcome event in the control group of trial $i$
+
+$\pi_i^T$ probability of the outcome event in the treatment group of trial $i$
+
+For $i = 1,…, K$, assume
+
+$r_i^C | n_i^C , \pi_i^C \sim$ Binomial($n_i^C, \pi_i^C$)
+
+$r_i^T | n_i^T , \pi_i^T \sim$ Binomial($n_i^T, \pi_i^T$)
+
+logit $\pi_i^C | \gamma_i, \theta_i = \gamma_i - \theta_i/2$
+
+logit $\pi_i^T | \gamma_i, \theta_i = \gamma_i + \theta_i/2$
+
+$\theta_i | \mu, \tau^2 \sim N(\mu, \tau^2)$; $\gamma_i \sim N(0, 100)$ (\*)
+
+$\mu \sim N(0,100)$; $\frac{1}{\tau^2} \sim$ Gamma$(0.001, 0.001)$ (\*\*)
+
+In this situation, we assume i studies with log odds ratio $\theta_i$ which estimates the study specific treatment effect, and a standard error for that estimate. We assume that due to differing study protocol and random chance, each study is estimating a log odds ratio that is drawn from a normal distribution with center $\mu$, where this $N(\mu, \sigma^2)$ is the random effect population prior $\pi(\theta_i | \mu, \tau)$.
+
+$$
+\begin{aligned}
+&i \in i,…,k \hspace{0.5cm} and \hspace{0.5cm} j \in \{C,T\}\\
+& Y_{ij}| \pi_{ij},n_{ij} \sim Bin(n_{ij}, \pi_{ij})\\
+& logit(\frac{\pi_{iT}}{\pi_{iC}}) = \theta_i | \mu, \tau^2 \sim N(\mu, \tau^2)\\
+& \mu \sim N(a_1, b_1 )\\
+& 1/\tau^2\sim gamma(a_2, b_2)\end{aligned}
+$$
+
+Closed form conditionals can be found for $\mu$ and $\tau^2$ and non-closed form numerical approximations can be found for the $\theta_i$'s and $\gamma_i$'s.
+
+## Application
+
+Let us consider a single treatment arm study that was repeated at 7 different sites. In each study, the sample sizes of each arm as well as the number of successes in each arm were recorded.
+
 ```{r}
-hyperparameters_ex <- list(#Mu priors N(0,100)
+dat <-  read.table(text = "
+                  trial rit nit ric nic
+                 Balcon 14 56 15 58
+                Clausen 18 66 19 64
+            Multicentre 15 100 12 95
+                 Barber 10 52 12 47
+                 Norris 21 226 24 228
+                 Kahler 3 38 6 31
+                Ledwich 2 20 3 20
+                  ", header = TRUE)
+
+dat$theta_i <- log(dat$rit/dat$nit/(1-dat$rit/dat$nit))-
+  log(dat$ric/dat$nic/(1-dat$ric/dat$nic))
+
+dat$gamma_i <- 0.5*(log(dat$rit/dat$nit/(1-dat$rit/dat$nit))+
+  log(dat$ric/dat$nic/(1-dat$ric/dat$nic)))
+
+dat
+```
+
+Note that for the hyperparameters are significant variables in the conditionals derived from the full likelihood. The hyperparameters of use will be set here.
+
+```{r}
+hyps <- list(#Mu priors N(0,100)
                         "a_mu" = 0,
                         "b_mu" = 100,
                         
@@ -33,39 +111,37 @@ hyperparameters_ex <- list(#Mu priors N(0,100)
                         "b_tau2" = 0.001)
 ```
 
+# Empirical Bayes
+
+The empirical bayesian analysis requires using the marginal likelihood for $\mu$ and $\tau^2$. This can be found using numeric integration, or approximation. The marginalLikelihood function of this package uses approximation by finding the average log likelihood for a given $\mu$ and $\tau^2$. The function is written in c++ backend for efficiency. This function requires the data to be in the format of a matrix with ordered columns for the rit, nit, ric, nic. The function also takes in hyperparameters for the gamma estimates.
+
 ```{r}
-data_ex <- read.table(text = "
-                  trial rit nit ric nic
-                 Balcon 14 56 15 58
-                Clausen 18 66 19 64
-            Multicentre 15 100 12 95
-                 Barber 10 52 12 47
-                 Norris 21 226 24 228
-                 Kahler 3 38 6 31
-                Ledwich 2 20 3 20
-                  ", header = TRUE)
-
-data_ex$theta_i <- log(data_ex$rit/data_ex$nit/(1-data_ex$rit/data_ex$nit))-
-  log(data_ex$ric/data_ex$nic/(1-data_ex$ric/data_ex$nic))
-
-data_ex$gamma_i <- 0.5*(log(data_ex$rit/data_ex$nit/(1-data_ex$rit/data_ex$nit))+
-  log(data_ex$ric/data_ex$nic/(1-data_ex$ric/data_ex$nic)))
+dat_Y <- as.matrix(dat[,2:5])
 ```
 
 ```{r}
-#Rcpp::sourceCpp("../src/rcpparma_marginalLikelihood.cpp")
-marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 10000, 0, 100) 
+#Example of usage
+set.seed(9134)
+marginalLikelihood(Y = dat_Y, 
+                   mu = 0.2, 
+                   tau2 = 0.1, 
+                   sim = 10000, 
+                   a_gamma = 0, 
+                   b_gamma = 100) 
 ```
+
+This is a useful function because it performs very quickly despite the need for a high number of simulations in order to attain stable estimates. Below we see an
+
 ```{r}
 optimize_func <- function(Y, mu, tau2){
     optim(par = c("mu" = mu, "tau2" = tau2),
           fn = function(par){
               value <- tryCatch(-marginalLikelihood(Y, par[1], par[2],
-                                                100000, 0, 100),
+                                                10000, 0, 100),
                                 error = function(e) Inf)
               if(!is.finite(value)){
                   cat("Non-finite value detected at:", par, "\n")
-                  return(0)
+                  return(-10000)
               }else{
               return(value)
               }
@@ -80,14 +156,15 @@ optimize_func <- function(Y, mu, tau2){
 hats <- optimize_func(Y=as.matrix(data_ex[,2:5]), mu=0.1, tau2=0.1)
 ```
 
-
 ```{r}
 marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 10000, 0, 100)
-marginalLikelihood(as.matrix(data_ex[,2:5]), 0.1443, 0.086, 10000, 0, 100)
+marginalLikelihood(as.matrix(data_ex[,2:5]), hats$par[1], hats$par[2], 10000, 0, 100)
 ```
+
 ```{r}
 mhGibbs(data_ex, hyperparameters_ex, 0.2, sim = 10, burn = 0)
 ```
+
 ```{r}
 posterior_labels <- c('V1' = "Balcon",
                          'V2' = "Clausen",
@@ -97,10 +174,10 @@ posterior_labels <- c('V1' = "Balcon",
                          'V6' = "Kahler",
                          'V7' = "Ledwich"  )
 
-test <- mhGibbs(data_ex, hyperparameters_ex, 0.01, sim = 1000, burn = 50)$thetas |>
+posteriors <- mhGibbs(data_ex, hyperparameters_ex, 0.2, sim = 100000, burn = 1000)$thetas |>
     as.data.frame()
 
-names(test)<- c("Balcon",
+names(posteriors)<- c("Balcon",
                  "Clausen",
                   "Multicentre",
                    "Barber",
@@ -108,13 +185,12 @@ names(test)<- c("Balcon",
                    "Kahler",
                    "Ledwich"  )
 
-# test |>
-#   tidyr::pivot_longer(everything(),
-#                names_to = "Trial",
-#                values_to = "Est")|>
-#   ggplot2::ggplot()+
-#   ggplot2::geom_histogram(aes(x= Est),
-#                  binwidth = 0.01)+
-#   facet_wrap(~Trial, scales = "free")
-```
+posteriors <- stack(posteriors)
+names(posteriors) <- c("Est", "Trial")
 
+posteriors|>
+  ggplot2::ggplot()+
+  ggplot2::geom_histogram(aes(x= Est),
+                 binwidth = 0.01)+
+  facet_wrap(~Trial, scales = "free")
+```
