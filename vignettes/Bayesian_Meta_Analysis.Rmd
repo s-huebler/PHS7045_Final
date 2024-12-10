@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(gmhs2)
+library(ggplot2)
 ```
 
 ```{r}
@@ -27,7 +28,7 @@ hyperparameters_ex <- list(#Mu priors N(0,100)
                         "a_gamma" = 0,
                         "b_gamma" = 100,
                         
-                        #Tau2 priors
+                        #Tau2 priors 1/Gamma(0.001, 0.001)
                         "a_tau2" = 0.001,
                         "b_tau2" = 0.001)
 ```
@@ -52,8 +53,71 @@ data_ex$gamma_i <- 0.5*(log(data_ex$rit/data_ex$nit/(1-data_ex$rit/data_ex$nit))
 ```
 
 ```{r}
-Rcpp::sourceCpp("../src/rcpparma_marginalLikelihood.cpp")
-marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 100, 0, 100) 
+#Rcpp::sourceCpp("../src/rcpparma_marginalLikelihood.cpp")
+marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 1000000, 0, 100) 
+```
+```{r}
+optimize_func <- function(Y, mu, tau2){
+    optim(par = c("mu" = mu, "tau2" = tau2),
+          fn = function(par){
+              value <- tryCatch(-marginalLikelihood(Y, par[1], par[2],
+                                                100000, 0, 100),
+                                error = function(e) Inf)
+              if(!is.finite(value)){
+                  cat("Non-finite value detected at:", par, "\n")
+              }
+              return(value)
+              },
+          method = "L-BFGS-B",
+          hessian = FALSE,
+          lower = c(0.0001, 0.0001),
+          upper = c(0.9999, Inf)
+          )
+}
+
+hats <- optimize_func(Y=as.matrix(data_ex[,2:5]), mu=0.1, tau2=0.1)
 ```
 
+
+```{r}
+marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 1000000, 0, 100)
+marginalLikelihood(as.matrix(data_ex[,2:5]), 0.1443, 0.086, 1000000, 0, 100)
+```
+```{r}
+mhGibbs(data_ex, hyperparameters_ex, 0.99, sim = 12, burn = 2)
+```
+```{r}
+posterior_labels <- c('V1' = "Balcon",
+                         'V2' = "Clausen",
+                         'V3' = "Multicentre",
+                         'V4' = "Barber",
+                         'V5' = "Norris",
+                         'V6' = "Kahler",
+                         'V7' = "Ledwich"  )
+
+test <- mhGibbs(data_ex, hyperparameters_ex, 0.01, sim = 1000, burn = 50)$thetas |>
+    as.data.frame()
+
+names(test)<- c("Balcon",
+                 "Clausen",
+                  "Multicentre",
+                   "Barber",
+                   "Norris",
+                   "Kahler",
+                   "Ledwich"  )
+
+test |>
+  tidyr::pivot_longer(everything(),
+               names_to = "Trial",
+               values_to = "Est")|>
+  ggplot2::ggplot()+
+  ggplot2::geom_histogram(aes(x= Est),
+                 binwidth = 0.01)+
+  facet_wrap(~Trial, scales = "free")#,
+  # #           labeller = as_labeller(posterior_labels))+
+  # ggplot2::theme_minimal()+
+  # ggplot2::xlab("Estimate")+
+  # ggplot2::ylab("Frequency")+
+  # ggplot2::ggtitle("Study Specific Log Odds Ratio Posterior Distributions")
+```
 
