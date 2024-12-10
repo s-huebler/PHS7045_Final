@@ -5,6 +5,7 @@ Version: 0.1
 Date: 2024-12-09
 Author: Sophie Huebler
 Description:  A package to use a Gibbs-Metropolis-Hastings Hybrid Algorithm for Bayesian Meta Analysis 
+Maintainer: Sophie Huebler <sophhuebler@gmail.com>
 License: MIT + file LICENSE
 Encoding: UTF-8
 Suggests:

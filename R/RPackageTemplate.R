@@ -13,8 +13,7 @@
 #'
 #' @name
 #' gmhs2
-#' @docType
-#' package
+"_PACKAGE"
 #' @importFrom
 #' Rcpp evalCpp
 #' @useDynLib

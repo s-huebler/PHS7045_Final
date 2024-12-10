@@ -51,5 +51,9 @@ data_ex$gamma_i <- 0.5*(log(data_ex$rit/data_ex$nit/(1-data_ex$rit/data_ex$nit))
   log(data_ex$ric/data_ex$nic/(1-data_ex$ric/data_ex$nic)))
 ```
 
+```{r}
+Rcpp::sourceCpp("../src/rcpparma_marginalLikelihood.cpp")
+marginalLikelihood(as.matrix(data_ex[,2:5]), 0.2, 0.1, 100, 0, 100) 
+```
 
 
