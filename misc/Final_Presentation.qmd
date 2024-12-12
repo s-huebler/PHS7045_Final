@@ -28,6 +28,7 @@ editor:
 
 ```{r}
 #| include = FALSE
+library(ggplot2)
 source("read_data.R")
 ```
 
@@ -114,3 +115,81 @@ rownames(benched) <- c("serial","parallel","c++" )
 ```{r}
 benched
 ```
+
+# Section 3: Worked Out Example
+
+
+
+## MLE {.scrollable .smaller}
+
+```{r}
+#| include: false
+hyps <- list(#Mu priors N(0,100)
+                        "a_mu" = 0,
+                        "b_mu" = 100,
+                        
+                        #Gamma priors N(0,100)
+                        "a_gamma" = 0,
+                        "b_gamma" = 100,
+                        
+                        #Tau2 priors 1/Gamma(0.001, 0.001)
+                        "a_tau2" = 0.001,
+                        "b_tau2" = 0.001)
+
+output_format <- function(res){
+    ret <- res$thetas |> as.data.frame()
+    
+    names(ret)<- c("Balcon",
+                 "Clausen",
+                  "Multicentre",
+                   "Barber",
+                   "Norris",
+                   "Kahler",
+                   "Ledwich"  )
+    
+    ret <- stack(ret)
+    names(ret) <- c("Est", "Trial")
+    
+  ret|>
+  ggplot2::ggplot()+
+  ggplot2::geom_histogram(aes(x= Est),
+                 binwidth = 0.01)+
+  facet_wrap(~Trial, scales = "free")
+}
+```
+
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| fig-height: 10
+
+optimize_func <- function(Y, mu, tau2){
+    optim(par = c("mu" = mu, "tau2" = tau2),
+          fn = function(par){
+              value <- tryCatch(-ghms2::marginalLikelihood(Y, par[1], par[2],
+                                                100000, 0, 100),
+                                error = function(e) Inf)
+              if(!is.finite(value)){
+                  return(-10000)
+              }else{
+              return(value)
+              }
+              },
+          method = "L-BFGS-B",
+          hessian = FALSE,
+          lower = c(0.0001, 0.0001),
+          upper = c(0.9, Inf)
+          )
+}
+
+hats <- optimize_func(Y=dat_Y, mu=0.1, tau2=0.1)
+emp_res <- gmhs2::mhGibbs(dat, hyps, mh_scale = 0.2, 
+                                    sim = 100000, burn = 10,
+        Bayesian = "empirical", hat_mu = hats$par[1], hat_tau2 = hats$par[2])
+
+output_format(emp_res)
+```
+
+
+
