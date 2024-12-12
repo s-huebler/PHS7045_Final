@@ -11,14 +11,14 @@ Encoding: UTF-8
 Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    kableExtra
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
     Rcpp,
     stats,
-    parallel,
     ggplot2 
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
