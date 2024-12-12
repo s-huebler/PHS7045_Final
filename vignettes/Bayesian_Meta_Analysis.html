@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Bayesian_Meta_Analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Bayesian_Meta_Analysis</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(gmhs2)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<div id="use-case" class="section level1">
+<h1>Use Case</h1>
+<p>The gmhs2 package is a package that can be used for bayesian meta
+analysis when the treatment effect of interest is an odds ratio. This
+package performs the gibbs-metropolis-hastings hybrid algorithm. The
+following 2 sections will outline the use case for the package, first
+theoretically and then with an example of suitable data that can be
+applied. The meta-analysis can be performed empirically or
+hierarchically, and both cases will be shown.</p>
+<div id="theoretical" class="section level2">
+<h2>Theoretical</h2>
+<p>The following notation will be used:</p>
+<p><span class="math inline">\(i\)</span> indexes trial</p>
+<p><span class="math inline">\(K\)</span> number of trials</p>
+<p><span class="math inline">\(r_i^C\)</span> number of outcome events
+in the control group of trial <span class="math inline">\(i\)</span></p>
+<p><span class="math inline">\(r_i^T\)</span> number of outcome events
+in the treatment group of trial <span class="math inline">\(i\)</span></p>
+<p><span class="math inline">\(n_i^C\)</span> number of individuals in
+the control group of trial <span class="math inline">\(i\)</span></p>
+<p><span class="math inline">\(n_i^T\)</span> number of individuals in
+the treatment group of trial <span class="math inline">\(i\)</span></p>
+<p><span class="math inline">\(\pi_i^C\)</span> probability of the
+outcome event in the control group of trial <span class="math inline">\(i\)</span></p>
+<p><span class="math inline">\(\pi_i^T\)</span> probability of the
+outcome event in the treatment group of trial <span class="math inline">\(i\)</span></p>
+<p>For <span class="math inline">\(i = 1,…, K\)</span>, assume</p>
+<p><span class="math inline">\(r_i^C | n_i^C , \pi_i^C \sim\)</span>
+Binomial(<span class="math inline">\(n_i^C, \pi_i^C\)</span>)</p>
+<p><span class="math inline">\(r_i^T | n_i^T , \pi_i^T \sim\)</span>
+Binomial(<span class="math inline">\(n_i^T, \pi_i^T\)</span>)</p>
+<p>logit <span class="math inline">\(\pi_i^C | \gamma_i, \theta_i =
+\gamma_i - \theta_i/2\)</span></p>
+<p>logit <span class="math inline">\(\pi_i^T | \gamma_i, \theta_i =
+\gamma_i + \theta_i/2\)</span></p>
+<p><span class="math inline">\(\theta_i | \mu, \tau^2 \sim N(\mu,
+\tau^2)\)</span>; <span class="math inline">\(\gamma_i \sim N(0,
+100)\)</span> (*)</p>
+<p><span class="math inline">\(\mu \sim N(0,100)\)</span>; <span class="math inline">\(\frac{1}{\tau^2} \sim\)</span> Gamma<span class="math inline">\((0.001, 0.001)\)</span> (**)</p>
+<p>In this situation, we assume i studies with log odds ratio <span class="math inline">\(\theta_i\)</span> which estimates the study
+specific treatment effect, and a standard error for that estimate. We
+assume that due to differing study protocol and random chance, each
+study is estimating a log odds ratio that is drawn from a normal
+distribution with center <span class="math inline">\(\mu\)</span>, where
+this <span class="math inline">\(N(\mu, \sigma^2)\)</span> is the random
+effect population prior <span class="math inline">\(\pi(\theta_i | \mu,
+\tau)\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;i \in i,…,k \hspace{0.5cm} and \hspace{0.5cm} j \in \{C,T\}\\
+&amp; Y_{ij}| \pi_{ij},n_{ij} \sim Bin(n_{ij}, \pi_{ij})\\
+&amp; logit(\frac{\pi_{iT}}{\pi_{iC}}) = \theta_i | \mu, \tau^2 \sim
+N(\mu, \tau^2)\\
+&amp; \mu \sim N(a_1, b_1 )\\
+&amp; 1/\tau^2\sim gamma(a_2, b_2)\end{aligned}
+\]</span></p>
+<p>Closed form conditionals can be found for <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span> and non-closed form numerical
+approximations can be found for the <span class="math inline">\(\theta_i\)</span>’s and <span class="math inline">\(\gamma_i\)</span>’s.</p>
+</div>
+<div id="application" class="section level2">
+<h2>Application</h2>
+<p>Let us consider a single treatment arm study that was repeated at 7
+different sites. In each study, the sample sizes of each arm as well as
+the number of successes in each arm were recorded.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span>  <span class="fu">read.table</span>(<span class="at">text =</span> <span class="st">&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="st">                  trial rit nit ric nic</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="st">                 Balcon 14 56 15 58</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="st">                Clausen 18 66 19 64</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="st">            Multicentre 15 100 12 95</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="st">                 Barber 10 52 12 47</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="st">                 Norris 21 226 24 228</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="st">                 Kahler 3 38 6 31</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="st">                Ledwich 2 20 3 20</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="st">                  &quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>dat<span class="sc">$</span>theta_i <span class="ot">&lt;-</span> <span class="fu">log</span>(dat<span class="sc">$</span>rit<span class="sc">/</span>dat<span class="sc">$</span>nit<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>dat<span class="sc">$</span>rit<span class="sc">/</span>dat<span class="sc">$</span>nit))<span class="sc">-</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="fu">log</span>(dat<span class="sc">$</span>ric<span class="sc">/</span>dat<span class="sc">$</span>nic<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>dat<span class="sc">$</span>ric<span class="sc">/</span>dat<span class="sc">$</span>nic))</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>dat<span class="sc">$</span>gamma_i <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(<span class="fu">log</span>(dat<span class="sc">$</span>rit<span class="sc">/</span>dat<span class="sc">$</span>nit<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>dat<span class="sc">$</span>rit<span class="sc">/</span>dat<span class="sc">$</span>nit))<span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  <span class="fu">log</span>(dat<span class="sc">$</span>ric<span class="sc">/</span>dat<span class="sc">$</span>nic<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>dat<span class="sc">$</span>ric<span class="sc">/</span>dat<span class="sc">$</span>nic)))</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>dat</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;         trial rit nit ric nic     theta_i    gamma_i</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; 1      Balcon  14  56  15  58 -0.04546237 -1.0758811</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; 2     Clausen  18  66  19  64 -0.11860574 -0.9215264</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; 3 Multicentre  15 100  12  95  0.19933290 -1.8342675</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; 4      Barber  10  52  12  47 -0.36464311 -1.2527630</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 5      Norris  21 226  24 228 -0.13842138 -2.2092769</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; 6      Kahler   3  38   6  31 -1.02961942 -1.9419261</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; 7     Ledwich   2  20   3  20 -0.46262352 -1.9659128</span></span></code></pre></div>
+<p>Note that for the hyperparameters are significant variables in the
+conditionals derived from the full likelihood. The hyperparameters of
+use will be set here.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>hyps <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="co">#Mu priors N(0,100)</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                        <span class="st">&quot;a_mu&quot;</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                        <span class="st">&quot;b_mu&quot;</span> <span class="ot">=</span> <span class="dv">100</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        </span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                        <span class="co">#Gamma priors N(0,100)</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                        <span class="st">&quot;a_gamma&quot;</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                        <span class="st">&quot;b_gamma&quot;</span> <span class="ot">=</span> <span class="dv">100</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                        </span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                        <span class="co">#Tau2 priors 1/Gamma(0.001, 0.001)</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                        <span class="st">&quot;a_tau2&quot;</span> <span class="ot">=</span> <span class="fl">0.001</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                        <span class="st">&quot;b_tau2&quot;</span> <span class="ot">=</span> <span class="fl">0.001</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="empirical-bayes" class="section level1">
+<h1>Empirical Bayes</h1>
+<p>The empirical bayesian analysis requires using the marginal
+likelihood for <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span>. This can be found using numeric
+integration, or approximation. The marginalLikelihood function of this
+package uses approximation by finding the average log likelihood for a
+given <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span>. The function is written in c++
+backend for efficiency. This function requires the data to be in the
+format of a matrix with ordered columns for the rit, nit, ric, nic. The
+function also takes in hyperparameters for the gamma estimates.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>dat_Y <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dat[,<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co">#Example of usage</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9134</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">marginalLikelihood</span>(<span class="at">Y =</span> dat_Y, </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                   <span class="at">mu =</span> <span class="fl">0.2</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                   <span class="at">tau2 =</span> <span class="fl">0.1</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                   <span class="at">sim =</span> <span class="dv">10000</span>, </span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                   <span class="at">a_gamma =</span> <span class="dv">0</span>, </span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                   <span class="at">b_gamma =</span> <span class="dv">100</span>) </span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; [1] -220.0878</span></span></code></pre></div>
+<p>This is a useful function because it performs very quickly despite
+the need for a high number of simulations in order to attain stable
+estimates. Below we see an optimization function which can be used to
+find maximum likelihood estimates for the 2 parameters given the
+hyperparmeters for gamma established above. The optimize function
+requires reasonable estimates for a starting choice of each
+parameter.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>optimize_func <span class="ot">&lt;-</span> <span class="cf">function</span>(Y, mu, tau2){</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="st">&quot;mu&quot;</span> <span class="ot">=</span> mu, <span class="st">&quot;tau2&quot;</span> <span class="ot">=</span> tau2),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>          <span class="at">fn =</span> <span class="cf">function</span>(par){</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>              value <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="sc">-</span><span class="fu">marginalLikelihood</span>(Y, par[<span class="dv">1</span>], par[<span class="dv">2</span>],</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                                                <span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">Inf</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>              <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.finite</span>(value)){</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                  <span class="fu">cat</span>(<span class="st">&quot;Non-finite value detected at:&quot;</span>, par, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                  <span class="fu">return</span>(<span class="sc">-</span><span class="dv">10000</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>              }<span class="cf">else</span>{</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>              <span class="fu">return</span>(value)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>              }</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>              },</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>          <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>          <span class="at">hessian =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>          <span class="at">lower =</span> <span class="fu">c</span>(<span class="fl">0.0001</span>, <span class="fl">0.0001</span>),</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>          <span class="at">upper =</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="cn">Inf</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>          )</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>}</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>hats <span class="ot">&lt;-</span> <span class="fu">optimize_func</span>(<span class="at">Y=</span>dat_Y, <span class="at">mu=</span><span class="fl">0.1</span>, <span class="at">tau2=</span><span class="fl">0.1</span>)</span></code></pre></div>
+<p>Here we see a comparison of the negative log likelihoods between the
+starting parameters and the MLE estimated parameters.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">marginalLikelihood</span>(dat_Y, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="dv">100000</span>, <span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; [1] -155.675</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">marginalLikelihood</span>(dat_Y, hats<span class="sc">$</span>par[<span class="dv">1</span>], hats<span class="sc">$</span>par[<span class="dv">2</span>], <span class="dv">100000</span>, <span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; [1] -160.8375</span></span></code></pre></div>
+<p>We can use these parameters to run the gibbs-metropolis-hastings
+function with the Bayesian = “empirical” argument.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>emp_res <span class="ot">&lt;-</span> <span class="fu">mhGibbs</span>(dat, hyps, <span class="at">mh_scale =</span> <span class="fl">0.2</span>, </span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                                    <span class="at">sim =</span> <span class="dv">1000</span>, <span class="at">burn =</span> <span class="dv">10</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>        <span class="at">Bayesian =</span> <span class="st">&quot;empirical&quot;</span>, <span class="at">hat_mu =</span> hats<span class="sc">$</span>par[<span class="dv">1</span>], <span class="at">hat_tau2 =</span> hats<span class="sc">$</span>par[<span class="dv">2</span>])</span></code></pre></div>
+<p>Now we can plot the results of our function.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>posterior_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;V1&#39;</span> <span class="ot">=</span> <span class="st">&quot;Balcon&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                         <span class="st">&#39;V2&#39;</span> <span class="ot">=</span> <span class="st">&quot;Clausen&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                         <span class="st">&#39;V3&#39;</span> <span class="ot">=</span> <span class="st">&quot;Multicentre&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                         <span class="st">&#39;V4&#39;</span> <span class="ot">=</span> <span class="st">&quot;Barber&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                         <span class="st">&#39;V5&#39;</span> <span class="ot">=</span> <span class="st">&quot;Norris&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                         <span class="st">&#39;V6&#39;</span> <span class="ot">=</span> <span class="st">&quot;Kahler&quot;</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                         <span class="st">&#39;V7&#39;</span> <span class="ot">=</span> <span class="st">&quot;Ledwich&quot;</span>  )</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>emp_thetas <span class="ot">&lt;-</span> emp_res<span class="sc">$</span>thetas <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">names</span>(emp_thetas)<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Balcon&quot;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>                 <span class="st">&quot;Clausen&quot;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>                  <span class="st">&quot;Multicentre&quot;</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>                   <span class="st">&quot;Barber&quot;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>                   <span class="st">&quot;Norris&quot;</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>                   <span class="st">&quot;Kahler&quot;</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>                   <span class="st">&quot;Ledwich&quot;</span>  )</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>emp_thetas <span class="ot">&lt;-</span> <span class="fu">stack</span>(emp_thetas)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="fu">names</span>(emp_thetas) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Est&quot;</span>, <span class="st">&quot;Trial&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>emp_thetas<span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x=</span> Est),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                 <span class="at">binwidth =</span> <span class="fl">0.01</span>)<span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Trial, <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="100%" /></p>
+</div>
+<div id="hierarchical-bayes" class="section level1">
+<h1>Hierarchical Bayes</h1>
+<p>The hierarchical model utilizes the posterior estimates for the hyper
+parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span> rather than estimating them
+empirically. They are updated in every step of the algorithm as well.
+Notice here that both the names and order of the columns in the data
+frame should match the structure used in the example.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>hier_res <span class="ot">&lt;-</span> <span class="fu">mhGibbs</span>(dat, hyps, <span class="at">mh_scale =</span> <span class="fl">0.2</span>, </span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                                    <span class="at">sim =</span> <span class="dv">1000</span>, <span class="at">burn =</span> <span class="dv">10</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>        <span class="at">Bayesian =</span> <span class="st">&quot;hierarchical&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>posterior_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;V1&#39;</span> <span class="ot">=</span> <span class="st">&quot;Balcon&quot;</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                         <span class="st">&#39;V2&#39;</span> <span class="ot">=</span> <span class="st">&quot;Clausen&quot;</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                         <span class="st">&#39;V3&#39;</span> <span class="ot">=</span> <span class="st">&quot;Multicentre&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                         <span class="st">&#39;V4&#39;</span> <span class="ot">=</span> <span class="st">&quot;Barber&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>                         <span class="st">&#39;V5&#39;</span> <span class="ot">=</span> <span class="st">&quot;Norris&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>                         <span class="st">&#39;V6&#39;</span> <span class="ot">=</span> <span class="st">&quot;Kahler&quot;</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>                         <span class="st">&#39;V7&#39;</span> <span class="ot">=</span> <span class="st">&quot;Ledwich&quot;</span>  )</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>hier_thetas <span class="ot">&lt;-</span> hier_res<span class="sc">$</span>thetas <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="fu">as.data.frame</span>()</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="fu">names</span>(hier_thetas)<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Balcon&quot;</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>                 <span class="st">&quot;Clausen&quot;</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>                  <span class="st">&quot;Multicentre&quot;</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>                   <span class="st">&quot;Barber&quot;</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>                   <span class="st">&quot;Norris&quot;</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>                   <span class="st">&quot;Kahler&quot;</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>                   <span class="st">&quot;Ledwich&quot;</span>  )</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>hier_thetas <span class="ot">&lt;-</span> <span class="fu">stack</span>(hier_thetas)</span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="fu">names</span>(hier_thetas) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Est&quot;</span>, <span class="st">&quot;Trial&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>hier_thetas<span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x=</span> Est),</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>                 <span class="at">binwidth =</span> <span class="fl">0.01</span>)<span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Trial, <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="100%" /></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

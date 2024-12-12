@@ -194,12 +194,16 @@ names(emp_thetas)<- c("Balcon",
 emp_thetas <- stack(emp_thetas)
 names(emp_thetas) <- c("Est", "Trial")
 
+
+
+```
+
+```{r, out.width="100%"}
 emp_thetas|>
   ggplot2::ggplot()+
   ggplot2::geom_histogram(aes(x= Est),
                  binwidth = 0.01)+
   facet_wrap(~Trial, scales = "free")
-
 ```
 
 # Hierarchical Bayes
@@ -235,6 +239,10 @@ names(hier_thetas)<- c("Balcon",
 hier_thetas <- stack(hier_thetas)
 names(hier_thetas) <- c("Est", "Trial")
 
+
+```
+
+```{r, out.width="100%"}
 hier_thetas|>
   ggplot2::ggplot()+
   ggplot2::geom_histogram(aes(x= Est),
