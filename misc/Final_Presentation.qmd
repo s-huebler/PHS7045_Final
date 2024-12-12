@@ -1,0 +1,116 @@
+---
+title: Meta-Analysis for the Binomial Model with Normal Random Effects
+subtitle: Heirarchical and Empirical Bayesian Approaches
+author: Sophie Huebler
+format: revealjs
+embed-resources: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Section 1: Overview
+
+## The Goal
+
+1)  Package the Gibbs Metropolis Hastings Hybrid Algorithm for component
+    wise updating of posterior estimates under both empirical and
+    hierarchical Bayesian frameworks. (GMHS2)
+
+2)  Create an efficient function to approximate the marginal likelihood
+    without numerical integration.
+
+## A Motivating Example {.scrollable .smaller}
+
+-   Binomial model: Multi-trial study
+
+-   Normal random effects
+
+```{r}
+#| include = FALSE
+source("read_data.R")
+```
+
+```{r}
+#| echo = FALSE
+dat |>
+  dplyr::select(trial:theta_i)|>
+  kableExtra::kbl(digits = 2,
+      caption = "Data",
+      col.names = c("Trial",
+                    "R_it", "N_it",
+                    "R_ic", "N_ic", "log(OR)"))|>
+  kableExtra::kable_classic_2(html_font = "Cambria")
+```
+
+## Where We Were
+
+![](Image1.PNG)
+
+# Section 2: Improvements
+
+## Optimized Code
+
+-   MH-Gibbs function iteratively updates = no (easy) parallelization
+
+## Optimized Code
+
+-   MH-Gibbs function iteratively updates = no (easy) parallelization
+
+    ![](Image2.png){width="605"}
+
+## Marginal Likelihood 
+
+![](Image3.PNG)
+
+## Marginal Likelihood
+
+![](Image4.PNG)
+
+## Marginal Likelihood
+
+![](imgage5.jpg){width="400"}
+
+## C++ Code
+
+```{r}
+#| include = FALSE
+
+source("marginalLikelihoodSerial.R")
+source("marginalLikelihoodParallel.R")
+dat_Y <- as.matrix(dat[,2:ncol(dat)])
+```
+
+```{r}
+#| include = FALSE
+benched <- bench::mark(
+  marginalLikelihoodSerial(mu = 0.2,
+                          tau2 = 0.1,
+                          Y = dat,
+                          #simulate
+                          sim = 10000), 
+  marginalLikelihoodParallel(mu = 0.2,
+                          tau2 = 0.1,
+                          Y = dat,
+                          #simulate
+                          sim = 10000), 
+  
+  gmhs2::marginalLikelihood(Y = dat_Y, 
+                   mu = 0.2, 
+                   tau2 = 0.1, 
+                   sim = 100, 
+                   a_gamma = 0, 
+                   b_gamma = 10000), 
+  check = FALSE, 
+  relative = FALSE,
+  iterations = 1)
+
+benched <- benched[,2:9] |> as.matrix()
+
+rownames(benched) <- c("serial","parallel","c++" )
+
+```
+
+```{r}
+benched
+```
